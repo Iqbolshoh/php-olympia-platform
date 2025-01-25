@@ -83,26 +83,26 @@ INSERT INTO
     )
 VALUES
     (
-        'admin',
-        'admin',
+        'Super',
+        'Admin',
+        'superadmin@example.com',
+        'superadmin',
+        '65c2a32982abe41b1e6ff888d351ee6b7ade33affd4a595667ea7db910aecaa8',
+        'superadmin'
+    ),
+    (
+        'Admin',
+        'Admin',
         'admin@example.com',
         'admin',
-        '0a25a187d5d33b84ba656020d3c8b41ae9c9617ced1c1524e8f530e14c87b775',
+        '65c2a32982abe41b1e6ff888d351ee6b7ade33affd4a595667ea7db910aecaa8',
         'admin'
     ),
     (
-        'user',
-        'user',
+        'User',
+        'User',
         'user@example.com',
         'user',
-        '0a25a187d5d33b84ba656020d3c8b41ae9c9617ced1c1524e8f530e14c87b775',
+        '65c2a32982abe41b1e6ff888d351ee6b7ade33affd4a595667ea7db910aecaa8',
         'user'
-    ),
-    (
-        'owner',
-        'owner',
-        'owner@example.com',
-        'owner',
-        '0a25a187d5d33b84ba656020d3c8b41ae9c9617ced1c1524e8f530e14c87b775',
-        'owner'
     );
