@@ -16,10 +16,8 @@ CREATE TABLE users (
     total_score INT DEFAULT 0,
     profile_picture VARCHAR(255) DEFAULT 'default.png',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    last_login TIMESTAMP NULL DEFAULT NULL
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-
 
 CREATE TABLE olympiads (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -74,7 +72,37 @@ CREATE TABLE donations (
         NULL
 );
 
-INSERT INTO users (first_name, last_name, email, username, password, role)
-VALUES ('admin', 'admin', 'admin@example.com', 'admin', '0a25a187d5d33b84ba656020d3c8b41ae9c9617ced1c1524e8f530e14c87b775', 'admin'),
-('user', 'user', 'user@example.com', 'user', '0a25a187d5d33b84ba656020d3c8b41ae9c9617ced1c1524e8f530e14c87b775', 'user'),
-('owner', 'owner', 'owner@example.com', 'owner', '0a25a187d5d33b84ba656020d3c8b41ae9c9617ced1c1524e8f530e14c87b775', 'owner');
+INSERT INTO
+    users (
+        first_name,
+        last_name,
+        email,
+        username,
+        password,
+        role
+    )
+VALUES
+    (
+        'admin',
+        'admin',
+        'admin@example.com',
+        'admin',
+        '0a25a187d5d33b84ba656020d3c8b41ae9c9617ced1c1524e8f530e14c87b775',
+        'admin'
+    ),
+    (
+        'user',
+        'user',
+        'user@example.com',
+        'user',
+        '0a25a187d5d33b84ba656020d3c8b41ae9c9617ced1c1524e8f530e14c87b775',
+        'user'
+    ),
+    (
+        'owner',
+        'owner',
+        'owner@example.com',
+        'owner',
+        '0a25a187d5d33b84ba656020d3c8b41ae9c9617ced1c1524e8f530e14c87b775',
+        'owner'
+    );
