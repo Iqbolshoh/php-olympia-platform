@@ -36,8 +36,11 @@ if (isset($_COOKIE['username']) && isset($_COOKIE['session_token'])) {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['role'] = $user['role'];
 
-        if ($user['role'] == 'admin') {
-            header("Location: ../admin/");
+        if ($user['role'] == 'superadmin') {
+            header("Location: ../superadmin/");
+            exit;
+        } elseif ($user['role'] == 'admin') {
+            header("Location: ../admin/"); 
             exit;
         } else {
             header("Location: ../");
