@@ -40,7 +40,7 @@ if (isset($_COOKIE['username']) && isset($_COOKIE['session_token'])) {
             header("Location: ../superadmin/");
             exit;
         } elseif ($user['role'] == 'admin') {
-            header("Location: ../admin/"); 
+            header("Location: ../admin/");
             exit;
         } else {
             header("Location: ../");
@@ -66,7 +66,9 @@ if (isset($_POST['submit'])) {
         setcookie('session_token', session_id(), time() + (86400 * 30), "/", "", true, true);
 
         $redirectPath = '../';
-        if ($user['role'] == 'admin') {
+        if ($user['role'] == 'superadmin') {
+            $redirectPath = '../superadmin';
+        } elseif ($user['role'] == 'admin') {
             $redirectPath = '../admin/';
         }
         ?>
