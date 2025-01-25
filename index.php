@@ -16,6 +16,7 @@ include './config.php';
 $query = new Database();
 
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
