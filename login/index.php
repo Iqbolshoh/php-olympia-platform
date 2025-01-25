@@ -67,7 +67,7 @@ if (isset($_POST['submit'])) {
 
         $redirectPath = '../';
         if ($user['role'] == 'superadmin') {
-            $redirectPath = '../superadmin';
+            $redirectPath = '../superadmin/';
         } elseif ($user['role'] == 'admin') {
             $redirectPath = '../admin/';
         }
