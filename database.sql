@@ -10,7 +10,7 @@ CREATE TABLE users (
     username VARCHAR(30) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     bio VARCHAR(120) DEFAULT '',
-    role ENUM('owner', 'admin', 'user') NOT NULL DEFAULT 'user',
+    role ENUM('superadmin', 'admin', 'user') NOT NULL DEFAULT 'user',
     profile_picture VARCHAR(255) DEFAULT 'default.png',
     total_donats INT DEFAULT 0,
     total_score INT DEFAULT 0,
