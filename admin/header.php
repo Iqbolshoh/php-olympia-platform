@@ -60,7 +60,7 @@ $menuItems = [
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Logo -->
     <a href="./" class="brand-link">
-        <img src="./src/images/logo.png" alt="Admin Panel Logo" class="brand-image img-circle elevation-3"
+        <img src="../src/images/logo.png" alt="Admin Panel Logo" class="brand-image img-circle elevation-3"
             style="opacity: .8">
         <span class="brand-text font-weight-light">Admin Panel</span>
     </a>
@@ -69,7 +69,7 @@ $menuItems = [
     <div class="sidebar">
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
-                <img src="./src/images/default.png" class="img-circle elevation-2" alt="User Image">
+                <img src="../src/images/default.png" class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info">
                 <a href="./" class="d-block">Iqbolshoh Ilhomjonov</a>
