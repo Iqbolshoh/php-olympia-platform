@@ -15,6 +15,7 @@ CREATE TABLE users (
     total_donats INT DEFAULT 0,
     total_score INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    
 );
 
 CREATE TABLE olympiads (
