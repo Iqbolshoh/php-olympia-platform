@@ -1,6 +1,6 @@
-CREATE DATABASE olimpy;
+CREATE DATABASE olympia;
 
-USE olimpy;
+USE olympia;
 
 CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
