@@ -34,7 +34,7 @@ $query = new Database();
 
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
-        <?php include 'includes/header.php' ?>
+        <?php include 'header.php' ?>
         <div class="content-wrapper">
 
             <?php
@@ -119,7 +119,7 @@ $query = new Database();
             </section>
         </div>
 
-        <?php include 'includes/footer.php'; ?>
+        <?php include 'footer.php'; ?>
     </div>
 
     <!-- jQuery -->
