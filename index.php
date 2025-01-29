@@ -16,6 +16,7 @@ $query = new Database();
 
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
 
