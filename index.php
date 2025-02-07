@@ -30,17 +30,12 @@ $query = new Database();
 </head>
 
 <body class="hold-transition sidebar-mini">
-    <div class="wrapper">
-        <?php include 'header.php' ?>
-        <div class="content-wrapper">
+  <div class="wrapper">
+    <?php include 'includes/header.php' ?>
+    <div class="content-wrapper">
 
-            <?php
-            $arr = array(
-                ["title" => "Home", "url" => "./"],
-                ["title" => "Dashboard", "url" => "#"],
-            );
-            renderHeader('Dashboard', $arr);
-            ?>
+      <section class="content">
+        <div class="container-fluid">
 
             <section class="content">
                 <div class="container-fluid">
