@@ -1,22 +1,33 @@
-<?php $currentPage = basename($_SERVER['SCRIPT_NAME']); ?>
 <?php
-// Sidebar-Menu structure -->
+$currentPage = basename($_SERVER['SCRIPT_NAME']);
+$pageTitle = "";
+
 $menuItems = [
     [
         "menuTitle" => "Menu",
         "icon" => "fas fa-home",
         "pages" => [
-            [
-                "title" => "Home",
-                "url" => "index.php",
-            ]
+            ["title" => "Home", "url" => "index.php"],
+            ["title" => "Alerts", "url" => "alerts.php"],
         ],
-    ]
+    ],
 ];
+
+$breadcrumbItems = [];
+foreach ($menuItems as $menuItem) {
+    foreach ($menuItem['pages'] as $page) {
+        if ($currentPage === $page['url']) {
+            $breadcrumbItems[] = ["title" => $menuItem['menuTitle'], "url" => "#"];
+            $breadcrumbItems[] = ["title" => $page['title'], "url" => $page['url']];
+            $pageTitle = $page['title'];
+            break;
+        }
+    }
+}
 ?>
 
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-    <!-- Left side of the navbar -->
     <ul class="navbar-nav">
         <li class="nav-item">
             <a class="nav-link" data-widget="pushmenu" role="button"><i class="fas fa-bars"></i></a>
@@ -24,22 +35,18 @@ $menuItems = [
         <li class="nav-item d-none d-sm-inline-block">
             <a href="./" class="nav-link">Home</a>
         </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a onclick="logout()" class="nav-link">Logout</a>
+        </li>
     </ul>
-
-    <!-- Search form -->
     <form class="form-inline ml-3">
         <div class="input-group input-group-sm">
-            <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search"
-                name="search">
+            <input class="form-control form-control-navbar" type="search" placeholder="Search" name="search">
             <div class="input-group-append">
-                <button class="btn btn-navbar" type="submit">
-                    <i class="fas fa-search"></i>
-                </button>
+                <button class="btn btn-navbar" type="submit"><i class="fas fa-search"></i></button>
             </div>
         </div>
     </form>
-
-    <!-- Right side of the navbar -->
     <ul class="navbar-nav ml-auto">
         <li class="nav-item dropdown">
             <a class="nav-link" href="#messages">
@@ -47,7 +54,6 @@ $menuItems = [
                 <span class="badge badge-danger navbar-badge">2</span>
             </a>
         </li>
-        <!-- Notifications dropdown -->
         <li class="nav-item dropdown">
             <a class="nav-link" href="#notifications">
                 <i class="far fa-bell"></i>
@@ -57,32 +63,44 @@ $menuItems = [
     </ul>
 </nav>
 
+<div class="main-header" style="padding: 0px 10px; background-color: #f4f6f9; border-bottom: none !important;">
+    <div class="content-header">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark"> <?= $pageTitle ?> </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <?php foreach ($breadcrumbItems as $item): ?>
+                        <li class="breadcrumb-item <?= $item['url'] === '#' ? 'active' : '' ?>">
+                            <?= $item['url'] === '#' ? $item['title'] : "<a href='{$item['url']}'>{$item['title']}</a>" ?>
+                        </li>
+                    <?php endforeach; ?>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
-    <!-- Logo -->
     <a href="./" class="brand-link">
-        <img src="../src/images/logo.png" alt="Admin Panel Logo" class="brand-image img-circle elevation-3"
-            style="opacity: .8">
+        <img src="./src/images/logo.png" alt="Admin Panel Logo" class="brand-image img-circle elevation-3">
         <span class="brand-text font-weight-light">Admin Panel</span>
     </a>
-
-    <!-- Sidebar -->
     <div class="sidebar">
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
-                <img src="../src/images/default.png" class="img-circle elevation-2" alt="User Image">
+                <img src="./src/images/default.png" class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info">
                 <a href="./" class="d-block">Iqbolshoh Ilhomjonov</a>
             </div>
         </div>
-
-        <!-- Sidebar menu -->
         <nav class="mt-2">
-            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
                 <?php foreach ($menuItems as $menuItem): ?>
-                    <?php
+                    <?php $isMenuOpen = false;
                     $isActive = false;
-                    $isMenuOpen = false;
                     foreach ($menuItem['pages'] as $page) {
                         if ($currentPage === $page['url']) {
                             $isActive = true;
@@ -96,9 +114,7 @@ $menuItems = [
                             <i class="nav-icon <?= $menuItem['icon'] ?>"></i>
                             <p>
                                 <?= $menuItem['menuTitle'] ?>
-                                <?php if (!empty($menuItem['pages'])): ?>
-                                    <i class="right fas fa-angle-left"></i>
-                                <?php endif; ?>
+                                <?= !empty($menuItem['pages']) ? '<i class="right fas fa-angle-left"></i>' : '' ?>
                             </p>
                         </a>
                         <?php if (!empty($menuItem['pages'])): ?>
@@ -118,38 +134,24 @@ $menuItems = [
                 <?php endforeach; ?>
             </ul>
         </nav>
-        <!-- /.sidebar-menu -->
     </div>
-    <!-- /.sidebar -->
 </aside>
 
-<?php
-function renderHeader($pageTitle, $breadcrumbItems)
-{
-    ?>
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="m-0 text-dark">
-                        <?= $pageTitle; ?>
-                    </h1>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <?php foreach ($breadcrumbItems as $item): ?>
-                            <?php if ($item['url'] === '#'): ?>
-                                <li class="breadcrumb-item active"><?= $item['title']; ?></li>
-                            <?php else: ?>
-                                <li class="breadcrumb-item"><a href="<?= $item['url']; ?>"><?= $item['title']; ?></a>
-                                </li>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    </ol>
-                </div>
-            </div>
-        </div>
-    </div>
-    <?php
-}
-?>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function logout() {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You will be logged out!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, log me out!'
+        }).then((result) => {
+            if (result.value) {
+                window.location.href = './logout/';
+            }
+        });
+    }
+</script>
