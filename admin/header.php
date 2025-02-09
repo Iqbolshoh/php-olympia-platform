@@ -137,7 +137,7 @@ $activePage = $activePageInfo['activePage'] ?? null;
             confirmButtonText: 'Yes, log me out!'
         }).then((result) => {
             if (result.value) {
-                window.location.href = './logout/';
+                window.location.href = '../logout/';
             }
         });
     }
