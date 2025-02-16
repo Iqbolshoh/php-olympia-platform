@@ -3,12 +3,13 @@ $currentPage = basename($_SERVER['SCRIPT_NAME']);
 
 $menuItems = [
     [
-        "menuTitle" => "Menu",
-        "icon" => "fas fa-home",
+        "menuTitle" => "Settings",
+        "icon" => "fas fa-cog",
         "pages" => [
-            ["title" => "Home", "url" => "index.php"]
+            ["title" => "Update Profile", "url" => "index.php"],
+            ["title" => "Active Sessions", "url" => "active_sessions.php"]
         ],
-    ],
+    ]
 ];
 
 $activePageInfo = array_reduce($menuItems, function ($carry, $menuItem) use ($currentPage) {
@@ -35,6 +36,7 @@ $activePage = $activePageInfo['activePage'] ?? null;
 ?>
 
 <title><?= $pageTitle ?></title>
+<link rel="icon" type="image/x-icon" href="./favicon.ico">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
@@ -85,7 +87,14 @@ $activePage = $activePageInfo['activePage'] ?? null;
     </a>
     <div class="sidebar">
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-            <div class="image"><img src="../src/images/default.png" class="img-circle elevation-2" alt="User Image">
+            <div class="image">
+                <?php
+                $filePath = "../src/images/profile_picture/" . $query->select("users", '*', "id = ?", [$_SESSION['user_id']], 'i')[0]['profile_picture'];
+                if (!file_exists($filePath)) {
+                    $filePath = "../src/images/profile_picture/default.png";
+                }
+                ?>
+                <img src="<?= $filePath ?>" class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info"><a href="./" class="d-block">Iqbolshoh Ilhomjonov</a></div>
         </div>

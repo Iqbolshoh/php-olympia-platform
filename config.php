@@ -2,7 +2,15 @@
 define("DB_SERVER", "localhost");
 define("DB_USERNAME", "root");
 define("DB_PASSWORD", "");
-define("DB_NAME", "olympia");
+define("DB_NAME", "auth_master");
+
+define("SITE_PATH", $_SERVER['REQUEST_SCHEME'] . "://" . $_SERVER['HTTP_HOST']);
+date_default_timezone_set('Etc/GMT-5');
+
+const ROLES = [
+    'admin' => '/admin/',
+    'user' => '/'
+];
 
 class Database
 {
@@ -106,5 +114,18 @@ class Database
     public function hashPassword($password)
     {
         return hash_hmac('sha256', $password, 'iqbolshoh');
+    }
+
+    public function checkUserSession($role)
+    {
+        if (($_SESSION['loggedin'] ?? false) !== true || ($_SESSION['role'] ?? '') !== $role) {
+            header("Location: " . SITE_PATH . "/login/");
+            exit;
+        }
+
+        if (!$this->select('active_sessions', '*', 'session_token = ?', [session_id()], 's')) {
+            header("Location: " . SITE_PATH . "/logout/");
+            exit;
+        }
     }
 }

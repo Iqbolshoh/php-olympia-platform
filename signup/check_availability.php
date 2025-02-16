@@ -1,13 +1,13 @@
 <?php
 session_start();
 
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
-    header("Location: ../");
-    exit;
-}
-
 include '../config.php';
 $query = new Database();
+
+if (!empty($_SESSION['loggedin']) && isset(ROLES[$_SESSION['role']])) {
+    header("Location: " . SITE_PATH . ROLES[$_SESSION['role']]);
+    exit;
+}
 
 $response = ['exists' => false];
 
