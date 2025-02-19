@@ -1,62 +1,90 @@
 <?php
 session_start();
 
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true && isset($_SESSION['role'])) {
-
-    if ($_SESSION['role'] == 'superadmin') {
-        header("Location: ../superadmin/");
-        exit;
-    } elseif ($_SESSION['role'] == 'admin') {
-        header("Location: ../admin/");
-        exit;
-    } else {
-        header("Location: ../");
-        exit;
-    }
-}
-
 include '../config.php';
 $query = new Database();
 
-if (isset($_COOKIE['username']) && isset($_COOKIE['session_token'])) {
+if (!empty($_SESSION['loggedin']) && isset(ROLES[$_SESSION['role']])) {
+    header("Location: " . SITE_PATH . ROLES[$_SESSION['role']]);
+    exit;
+}
 
-    if (session_id() !== $_COOKIE['session_token']) {
-        session_write_close();
-        session_id($_COOKIE['session_token']);
-        session_start();
-    }
+if (!empty($_COOKIE['username']) && !empty($_COOKIE['session_token']) && session_id() !== $_COOKIE['session_token']) {
+    session_write_close();
+    session_id($_COOKIE['session_token']);
+    session_start();
+}
 
-    $result = $query->select('users', 'id, role', "username = ?", [$_COOKIE['username']], 's');
+if (!empty($_COOKIE['username'])) {
+    $username = $_COOKIE['username'];
+    $user = $query->select('users', 'id, role', "username = ?", [$username], 's')[0] ?? null;
 
-    if (!empty($result)) {
-        $user = $result[0];
-
+    if (!empty($user)) {
         $_SESSION['loggedin'] = true;
-        $_SESSION['username'] = $_COOKIE['username'];
         $_SESSION['user_id'] = $user['id'];
+        $_SESSION['username'] = $username;
         $_SESSION['role'] = $user['role'];
 
-        if ($user['role'] == 'superadmin') {
-            header("Location: ../superadmin/");
-            exit;
-        } elseif ($user['role'] == 'admin') {
-            header("Location: ../admin/"); 
-            exit;
-        } else {
-            header("Location: ../");
+        $active_sessions = $query->select("active_sessions", "*", "session_token = ?", [session_id()], "s");
+
+        if (!empty($active_sessions)) {
+            $query->update(
+                "active_sessions",
+                ['last_activity' => date('Y-m-d H:i:s')],
+                "session_token = ?",
+                [$session_token],
+                "s"
+            );
+        }
+
+        if (isset(ROLES[$user['role']])) {
+            header("Location: " . SITE_PATH . ROLES[$_SESSION['role']]);
             exit;
         }
     }
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+$_SESSION['csrf_token'] ??= bin2hex(random_bytes(32));
+
+function get_user_info()
+{
+    $user_agent = $_SERVER['HTTP_USER_AGENT'];
+
+    $devices = [
+        'iPhone' => 'iPhone',
+        'iPad' => 'iPad',
+        'Macintosh|Mac OS X' => 'Mac',
+        'Windows NT 10.0' => 'Windows 10 PC',
+        'Windows NT 6.3' => 'Windows 8.1 PC',
+        'Windows NT 6.2' => 'Windows 8 PC',
+        'Windows NT 6.1' => 'Windows 7 PC',
+        'Android' => 'Android Phone',
+        'Linux' => 'Linux Device',
+    ];
+
+    foreach ($devices as $regex => $device) {
+        if (preg_match("/$regex/i", $user_agent)) {
+            return $device;
+        }
+    }
+
+    return "Unknown Device";
+}
+
+if (
+    $_SERVER["REQUEST_METHOD"] === "POST" &&
+    isset($_POST['submit']) &&
+    isset($_POST['csrf_token']) &&
+    isset($_SESSION['csrf_token']) &&
+    hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])
+) {
 
     $first_name = $query->validate($_POST['first_name']);
     $last_name = $query->validate($_POST['last_name']);
     $email = $query->validate(strtolower($_POST['email']));
     $username = $query->validate(strtolower($_POST['username']));
     $password = $query->hashPassword($_POST['password']);
-    $role = 'user'; // default
+    $role = 'user'; // default role is 'user'
 
     $data = [
         'first_name' => $first_name,
@@ -64,50 +92,66 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         'email' => $email,
         'username' => $username,
         'password' => $password,
-        'role' => $role
+        'role' => $role,
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s')
     ];
 
-    $result = $query->insert('users', $data);
+    $user = $query->insert('users', $data);
 
-    if (!empty($result)) {
+    if (!empty($user)) {
         $user_id = $query->select('users', 'id', 'username = ?', [$username], 's')[0]['id'];
 
         $_SESSION['loggedin'] = true;
-        $_SESSION['username'] = $username;
         $_SESSION['user_id'] = $user_id;
+        $_SESSION['username'] = $username;
         $_SESSION['role'] = $role;
 
-        $redirectPath = '../';
+        $cookies = [
+            'username' => $username,
+            'session_token' => session_id()
+        ];
 
-        setcookie('username', $username, time() + (86400 * 30), "/", "", true, true);
-        setcookie('session_token', session_id(), time() + (86400 * 30), "/", "", true, true);
+        foreach ($cookies as $name => $value) {
+            setcookie($name, $value, [
+                'expires' => time() + (86400 * 30),
+                'path' => '/',
+                'secure' => true,
+                'httponly' => true,
+                'samesite' => 'Strict'
+            ]);
+        }
+
+        $query->insert('active_sessions', [
+            'user_id' => $user_id,
+            'device_name' => get_user_info(),
+            'ip_address' => $_SERVER['REMOTE_ADDR'],
+            'last_activity' => date('Y-m-d H:i:s'),
+            'session_token' => session_id()
+        ]);
+
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+        $redirectPath = SITE_PATH . ROLES[$_SESSION['role']];
         ?>
         <script>
-            window.onload = function () {
-                Swal.fire({
-                    position: 'top-end',
-                    icon: 'success',
-                    title: 'Registration successful',
-                    showConfirmButton: false,
-                    timer: 1500
-                }).then(() => {
-                    window.location.href = '<?= $redirectPath; ?>';
-                });
-            };
+            window.onload = function () { Swal.fire({ icon: 'success', title: 'Registration successfu', timer: 1500, showConfirmButton: false }).then(() => { window.location.href = '<?= $redirectPath; ?>'; }); };
         </script>
-
         <?php
     } else {
-        echo "<script>
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Registration failed. Please try again later.',
-                    });
-            </script>";
+        ?>
+        <script>
+            window.onload = function () { Swal.fire({ icon: 'error', title: 'Oops...', text: 'Registration failed. Please try again.', showConfirmButton: true }); };
+        </script>
+        <?php
     }
+} elseif (isset($_POST['submit'])) {
+    ?>
+    <script>
+        window.onload = function () { Swal.fire({ icon: 'error', title: 'Invalid CSRF Token', text: 'Please refresh the page and try again.', showConfirmButton: true }); };
+    </script>
+    <?php
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -125,7 +169,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
     <div class="form-container">
         <h1>Sign Up</h1>
-        <form id="signupForm" method="post" action="">
+        <form id="signupForm" method="POST">
             <div class="form-group">
                 <label for="first_name">First Name</label>
                 <input type="text" id="first_name" name="first_name" required maxlength="30">
@@ -137,146 +181,125 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" required maxlength="100">
-                <p id="email-message"></p>
+                <small id="email-message"></small>
             </div>
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required maxlength="30">
-                <p id="username-message"></p>
+                <small id="username-message"></small>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
                 <div class="password-container">
                     <input type="password" id="password" name="password" required maxlength="255">
-                    <button type="button" id="toggle-password" class="password-toggle"><i
-                            class="fas fa-eye"></i></button>
+                    <button type="button" id="toggle-password" class="password-toggle">
+                        <i class="fas fa-eye"></i>
+                    </button>
                 </div>
+                <small id="password-message"></small>
             </div>
             <div class="form-group">
-                <button type="submit" id="submit">Sign Up</button>
+                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+            </div>
+            <div class="form-group">
+                <button type="submit" name="submit" id="submit">Sign Up</button>
             </div>
         </form>
         <div class="text-center">
             <p>Already have an account? <a href="../login/">Login</a></p>
         </div>
     </div>
-
-
-    <script src="../src/js/sweetalert2.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        let isEmailAvailable = false;
-        let isUsernameAvailable = false;
-
-        function validateUsernameFormat(username) {
-            const usernamePattern = /^[a-zA-Z0-9_]+$/;
-            return usernamePattern.test(username);
-        }
-
-        document.getElementById('email').addEventListener('input', function () {
-            let email = this.value;
-            if (email.length > 0) {
-                fetch('check_availability.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `email=${encodeURIComponent(email)}`
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        const messageElement = document.getElementById('email-message');
-                        if (data.exists) {
-                            messageElement.textContent = 'This email exists!';
-                            isEmailAvailable = false;
-                        } else {
-                            messageElement.textContent = '';
-                            isEmailAvailable = true;
-                        }
-                    });
-            }
-        });
-
-        document.getElementById('username').addEventListener('input', function () {
-            let username = this.value;
-            const messageElement = document.getElementById('username-message');
-
-            if (!validateUsernameFormat(username)) {
-                messageElement.textContent = 'Username can only contain letters, numbers, and underscores!';
-                isUsernameAvailable = false;
-                return;
-            }
-
-            if (username.length > 0) {
-                fetch('check_availability.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `username=${encodeURIComponent(username)}`
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.exists) {
-                            messageElement.textContent = 'This username exists!';
-                            isUsernameAvailable = false;
-                        } else {
-                            messageElement.textContent = '';
-                            isUsernameAvailable = true;
-                        }
-                    });
-            } else {
-                messageElement.textContent = '';
-            }
-        });
-
-        function validateEmailFormat(email) {
-            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-            return emailPattern.test(email);
-        }
-
-        document.getElementById('signupForm').addEventListener('submit', function (event) {
-            let email = document.getElementById('email').value;
-            const emailMessageElement = document.getElementById('email-message');
-            let username = document.getElementById('username').value;
-            const usernameMessageElement = document.getElementById('username-message');
-
-            if (!validateEmailFormat(email)) {
-                emailMessageElement.textContent = 'Email format is incorrect!';
-                event.preventDefault();
-                return;
-            }
-
-            if (!validateUsernameFormat(username)) {
-                usernameMessageElement.textContent = 'Username can only contain letters, numbers, and underscores!';
-                event.preventDefault();
-                return;
-            }
-
-            if (isEmailAvailable === false) {
-                emailMessageElement.textContent = 'This email exists!';
-                event.preventDefault();
-            }
-
-            if (isUsernameAvailable === false) {
-                usernameMessageElement.textContent = 'This username exists!';
-                event.preventDefault();
-            }
-        });
-
-        document.getElementById('toggle-password').addEventListener('click', function () {
+        document.addEventListener('DOMContentLoaded', function () {
+            const emailField = document.getElementById('email');
+            const usernameField = document.getElementById('username');
             const passwordField = document.getElementById('password');
-            const toggleIcon = this.querySelector('i');
+            const emailMessage = document.getElementById('email-message');
+            const usernameMessage = document.getElementById('username-message');
+            const passwordMessage = document.getElementById('password-message');
+            const submitButton = document.getElementById('submit');
+            const togglePassword = document.getElementById('toggle-password');
 
-            if (passwordField.type === 'password') {
-                passwordField.type = 'text';
-                toggleIcon.classList.remove('fa-eye');
-                toggleIcon.classList.add('fa-eye-slash');
-            } else {
-                passwordField.type = 'password';
-                toggleIcon.classList.remove('fa-eye-slash');
-                toggleIcon.classList.add('fa-eye');
+            let emailAvailable = false;
+            let usernameAvailable = false;
+
+            function validateEmailFormat(email) {
+                return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(email);
             }
+
+            function validateUsernameFormat(username) {
+                return /^[a-zA-Z0-9_]{3,30}$/.test(username);
+            }
+
+            function validatePassword() {
+                if (passwordField.value.length < 8) {
+                    passwordMessage.textContent = 'Password must be at least 8 characters long!';
+                    return false;
+                }
+                passwordMessage.textContent = '';
+                return true;
+            }
+
+            function checkAvailability(type, value, messageElement, callback) {
+                if (!value) return;
+
+                fetch('check_availability.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `${type}=${encodeURIComponent(value)}`
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            messageElement.textContent = `This ${type} is already taken!`;
+                            callback(false);
+                        } else {
+                            messageElement.textContent = '';
+                            callback(true);
+                        }
+                        updateSubmitButtonState();
+                    });
+            }
+
+            function updateSubmitButtonState() {
+                submitButton.disabled = !(emailAvailable && usernameAvailable && validatePassword());
+            }
+
+            emailField.addEventListener('input', function () {
+                if (!validateEmailFormat(this.value)) {
+                    emailMessage.textContent = 'Invalid email format!';
+                    emailAvailable = false;
+                    updateSubmitButtonState();
+                    return;
+                }
+                checkAvailability('email', this.value, emailMessage, status => {
+                    emailAvailable = status;
+                });
+            });
+
+            usernameField.addEventListener('input', function () {
+                if (!validateUsernameFormat(this.value)) {
+                    usernameMessage.textContent = 'Username must be 3-30 characters long and contain only letters, numbers, and underscores!';
+                    usernameAvailable = false;
+                    updateSubmitButtonState();
+                    return;
+                }
+                checkAvailability('username', this.value, usernameMessage, status => {
+                    usernameAvailable = status;
+                });
+            });
+
+            passwordField.addEventListener('input', function () {
+                validatePassword();
+                updateSubmitButtonState();
+            });
+
+            togglePassword.addEventListener('click', function () {
+                passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
         });
     </script>
 </body>
