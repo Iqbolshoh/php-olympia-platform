@@ -32,7 +32,7 @@ if (!empty($_COOKIE['username'])) {
                 "active_sessions",
                 ['last_activity' => date('Y-m-d H:i:s')],
                 "session_token = ?",
-                [$session_token],
+                [session_id()],
                 "s"
             );
         }
@@ -151,11 +151,7 @@ if (
 <body>
     <div class="form-container">
         <h1>Login</h1>
-<<<<<<< HEAD
-        <form id="loginForm" method="POST" action="">
-=======
         <form id="loginForm" method="POST">
->>>>>>> fe6c7f2e2bba8cd7f2ce5443a5ff2bdc1911754f
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required maxlength="30">
@@ -184,44 +180,8 @@ if (
     </div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-<<<<<<< HEAD
-        const usernameField = document.getElementById('username');
-        const passwordField = document.getElementById('password');
-        const usernameError = document.getElementById('username-error');
-        const passwordMessage = document.getElementById('password-message');
-        const submitButton = document.getElementById('submit');
-
-        function validateUsername() {
-            const username = usernameField.value;
-            const usernamePattern = /^[a-zA-Z0-9_]+$/;
-            if (!usernamePattern.test(username)) {
-                usernameError.textContent = "Username can only contain letters, numbers, and underscores!";
-                submitButton.disabled = true;
-            } else {
-                usernameError.textContent = "";
-                submitButton.disabled = false;
-            }
-        }
-
-        function validatePassword() {
-            const password = passwordField.value;
-            if (password.length < 8) {
-                passwordMessage.textContent = 'Password must be at least 8 characters long!';
-                submitButton.disabled = true;
-            } else {
-                passwordMessage.textContent = '';
-                submitButton.disabled = false;
-            }
-        }
-
-        usernameField.addEventListener('input', validateUsername);
-        passwordField.addEventListener('input', validatePassword);
-
-        document.getElementById('toggle-password').addEventListener('click', function () {
-=======
         document.addEventListener('DOMContentLoaded', function () {
             const usernameField = document.getElementById('username');
->>>>>>> fe6c7f2e2bba8cd7f2ce5443a5ff2bdc1911754f
             const passwordField = document.getElementById('password');
             const usernameError = document.getElementById('username-error');
             const passwordMessage = document.getElementById('password-message');
@@ -229,23 +189,6 @@ if (
             const togglePassword = document.getElementById('toggle-password');
             const loginForm = document.getElementById('loginForm');
 
-<<<<<<< HEAD
-            if (passwordField.type === 'password') {
-                passwordField.type = 'text';
-                toggleIcon.classList.replace('fa-eye', 'fa-eye-slash');
-            } else {
-                passwordField.type = 'password';
-                toggleIcon.classList.replace('fa-eye-slash', 'fa-eye');
-            }
-        });
-
-        document.getElementById('loginForm').addEventListener('submit', function (event) {
-            validateUsername();
-            validatePassword();
-
-            if (usernameError.textContent || passwordMessage.textContent) {
-                event.preventDefault();
-=======
             function validateUsername() {
                 const username = usernameField.value.trim();
                 const usernamePattern = /^[a-zA-Z0-9_]{3,30}$/;
@@ -259,7 +202,6 @@ if (
                     submitButton.disabled = false;
                     return true;
                 }
->>>>>>> fe6c7f2e2bba8cd7f2ce5443a5ff2bdc1911754f
             }
 
             function validatePassword() {

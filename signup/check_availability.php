@@ -4,11 +4,6 @@ session_start();
 include '../config.php';
 $query = new Database();
 
-if (!empty($_SESSION['loggedin']) && isset(ROLES[$_SESSION['role']])) {
-    header("Location: " . SITE_PATH . ROLES[$_SESSION['role']]);
-    exit;
-}
-
 $response = ['exists' => false];
 
 if (isset($_POST['email'])) {

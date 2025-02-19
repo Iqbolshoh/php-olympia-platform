@@ -32,7 +32,7 @@ if (!empty($_COOKIE['username'])) {
                 "active_sessions",
                 ['last_activity' => date('Y-m-d H:i:s')],
                 "session_token = ?",
-                [$session_token],
+                [session_id()],
                 "s"
             );
         }
@@ -169,11 +169,7 @@ if (
 <body>
     <div class="form-container">
         <h1>Sign Up</h1>
-<<<<<<< HEAD
-        <form id="signupForm" method="POST" action="">
-=======
         <form id="signupForm" method="POST">
->>>>>>> fe6c7f2e2bba8cd7f2ce5443a5ff2bdc1911754f
             <div class="form-group">
                 <label for="first_name">First Name</label>
                 <input type="text" id="first_name" name="first_name" required maxlength="30">
@@ -215,133 +211,9 @@ if (
     </div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-<<<<<<< HEAD
-        let isEmailAvailable = false;
-        let isUsernameAvailable = false;
-
-        function validateUsernameFormat(username) {
-            const usernamePattern = /^[a-zA-Z0-9_]+$/;
-            return usernamePattern.test(username);
-        }
-
-        function validateEmailFormat(email) {
-            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-            return emailPattern.test(email);
-        }
-
-        function checkAvailability(type, value, messageElement, callback) {
-            fetch('check_availability.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `${type}=${encodeURIComponent(value)}`
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.exists) {
-                        messageElement.textContent = `This ${type} exists!`;
-                        callback(false);
-                    } else {
-                        messageElement.textContent = '';
-                        callback(true);
-                    }
-                });
-        }
-
-        function calculatePasswordStrength(password) {
-            let strength = 0;
-            const lengthBonus = password.length > 7 ? 1 : 0;
-            const numberBonus = /[0-9]/.test(password) ? 1 : 0;
-            const lowercaseBonus = /[a-z]/.test(password) ? 1 : 0;
-            const uppercaseBonus = /[A-Z]/.test(password) ? 1 : 0;
-            const specialCharBonus = /[!@#$%^&*(),.?":{}|<>]/.test(password) ? 1 : 0;
-            const repetitionPenalty = /(.)\1{2,}/.test(password) ? -1 : 0;
-
-            strength = lengthBonus + numberBonus + lowercaseBonus + uppercaseBonus + specialCharBonus + repetitionPenalty;
-            return strength;
-        }
-
-        document.getElementById('email').addEventListener('input', function () {
-            const email = this.value;
-            const emailMessageElement = document.getElementById('email-message');
-
-            if (!validateEmailFormat(email)) {
-                emailMessageElement.textContent = 'Email format is incorrect!';
-                isEmailAvailable = false;
-                return;
-            }
-
-            checkAvailability('email', email, emailMessageElement, status => isEmailAvailable = status);
-        });
-
-        document.getElementById('username').addEventListener('input', function () {
-            const username = this.value;
-            const usernameMessageElement = document.getElementById('username-message');
-
-            if (!validateUsernameFormat(username)) {
-                usernameMessageElement.textContent = 'Username can only contain letters, numbers, and underscores!';
-                isUsernameAvailable = false;
-                return;
-            }
-
-            checkAvailability('username', username, usernameMessageElement, status => isUsernameAvailable = status);
-        });
-
-        document.getElementById('password').addEventListener('input', function () {
-            const password = this.value;
-            const passwordMessageElement = document.getElementById('password-message');
-            let message = '';
-
-            if (password.length < 8) {
-                passwordMessageElement.textContent = 'Password must be at least 8 characters long!';
-                passwordMessageElement.className = 'strength-weak';
-                return;
-            }
-
-            passwordMessageElement.textContent = message;
-        });
-
-        document.getElementById('signupForm').addEventListener('submit', function (event) {
-            const email = document.getElementById('email').value;
-            const emailMessageElement = document.getElementById('email-message');
-            const username = document.getElementById('username').value;
-            const usernameMessageElement = document.getElementById('username-message');
-            const password = document.getElementById('password').value;
-            const passwordMessageElement = document.getElementById('password-message');
-
-            if (!validateEmailFormat(email)) {
-                emailMessageElement.textContent = 'Email format is incorrect!';
-                event.preventDefault();
-            }
-
-            if (!validateUsernameFormat(username)) {
-                usernameMessageElement.textContent = 'Username can only contain letters, numbers, and underscores!';
-                event.preventDefault();
-            }
-
-            if (!isEmailAvailable) {
-                emailMessageElement.textContent = 'This email exists!';
-                event.preventDefault();
-            }
-
-            if (!isUsernameAvailable) {
-                usernameMessageElement.textContent = 'This username exists!';
-                event.preventDefault();
-            }
-
-            if (password.length < 8) {
-                passwordMessageElement.textContent = 'Password must be at least 8 characters long!';
-                event.preventDefault();
-            }
-        });
-
-        document.getElementById('toggle-password').addEventListener('click', function () {
-=======
         document.addEventListener('DOMContentLoaded', function () {
             const emailField = document.getElementById('email');
             const usernameField = document.getElementById('username');
->>>>>>> fe6c7f2e2bba8cd7f2ce5443a5ff2bdc1911754f
             const passwordField = document.getElementById('password');
             const emailMessage = document.getElementById('email-message');
             const usernameMessage = document.getElementById('username-message');
@@ -349,20 +221,11 @@ if (
             const submitButton = document.getElementById('submit');
             const togglePassword = document.getElementById('toggle-password');
 
-<<<<<<< HEAD
-            if (passwordField.type === 'password') {
-                passwordField.type = 'text';
-                toggleIcon.classList.replace('fa-eye', 'fa-eye-slash');
-            } else {
-                passwordField.type = 'password';
-                toggleIcon.classList.replace('fa-eye-slash', 'fa-eye');
-=======
             let emailAvailable = false;
             let usernameAvailable = false;
 
             function validateEmailFormat(email) {
                 return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(email);
->>>>>>> fe6c7f2e2bba8cd7f2ce5443a5ff2bdc1911754f
             }
 
             function validateUsernameFormat(username) {
