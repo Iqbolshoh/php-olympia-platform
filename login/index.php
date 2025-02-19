@@ -151,7 +151,11 @@ if (
 <body>
     <div class="form-container">
         <h1>Login</h1>
+<<<<<<< HEAD
         <form id="loginForm" method="POST" action="">
+=======
+        <form id="loginForm" method="POST">
+>>>>>>> fe6c7f2e2bba8cd7f2ce5443a5ff2bdc1911754f
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required maxlength="30">
@@ -180,6 +184,7 @@ if (
     </div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+<<<<<<< HEAD
         const usernameField = document.getElementById('username');
         const passwordField = document.getElementById('password');
         const usernameError = document.getElementById('username-error');
@@ -213,9 +218,18 @@ if (
         passwordField.addEventListener('input', validatePassword);
 
         document.getElementById('toggle-password').addEventListener('click', function () {
+=======
+        document.addEventListener('DOMContentLoaded', function () {
+            const usernameField = document.getElementById('username');
+>>>>>>> fe6c7f2e2bba8cd7f2ce5443a5ff2bdc1911754f
             const passwordField = document.getElementById('password');
-            const toggleIcon = this.querySelector('i');
+            const usernameError = document.getElementById('username-error');
+            const passwordMessage = document.getElementById('password-message');
+            const submitButton = document.getElementById('submit');
+            const togglePassword = document.getElementById('toggle-password');
+            const loginForm = document.getElementById('loginForm');
 
+<<<<<<< HEAD
             if (passwordField.type === 'password') {
                 passwordField.type = 'text';
                 toggleIcon.classList.replace('fa-eye', 'fa-eye-slash');
@@ -231,7 +245,49 @@ if (
 
             if (usernameError.textContent || passwordMessage.textContent) {
                 event.preventDefault();
+=======
+            function validateUsername() {
+                const username = usernameField.value.trim();
+                const usernamePattern = /^[a-zA-Z0-9_]{3,30}$/;
+
+                if (!usernamePattern.test(username)) {
+                    usernameError.textContent = "Username must be 3-30 characters long and contain only letters, numbers, and underscores!";
+                    submitButton.disabled = true;
+                    return false;
+                } else {
+                    usernameError.textContent = "";
+                    submitButton.disabled = false;
+                    return true;
+                }
+>>>>>>> fe6c7f2e2bba8cd7f2ce5443a5ff2bdc1911754f
             }
+
+            function validatePassword() {
+                const password = passwordField.value;
+                if (password.length < 8) {
+                    passwordMessage.textContent = 'Password must be at least 8 characters long!';
+                    submitButton.disabled = true;
+                    return false;
+                }
+                passwordMessage.textContent = '';
+                submitButton.disabled = false;
+                return true;
+            }
+
+            usernameField.addEventListener('input', validateUsername);
+            passwordField.addEventListener('input', validatePassword);
+
+            togglePassword.addEventListener('click', function () {
+                passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+
+            loginForm.addEventListener('submit', function (event) {
+                if (!validateUsername() || !validatePassword()) {
+                    event.preventDefault();
+                }
+            });
         });
     </script>
 </body>

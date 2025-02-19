@@ -169,7 +169,11 @@ if (
 <body>
     <div class="form-container">
         <h1>Sign Up</h1>
+<<<<<<< HEAD
         <form id="signupForm" method="POST" action="">
+=======
+        <form id="signupForm" method="POST">
+>>>>>>> fe6c7f2e2bba8cd7f2ce5443a5ff2bdc1911754f
             <div class="form-group">
                 <label for="first_name">First Name</label>
                 <input type="text" id="first_name" name="first_name" required maxlength="30">
@@ -211,6 +215,7 @@ if (
     </div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+<<<<<<< HEAD
         let isEmailAvailable = false;
         let isUsernameAvailable = false;
 
@@ -332,16 +337,106 @@ if (
         });
 
         document.getElementById('toggle-password').addEventListener('click', function () {
+=======
+        document.addEventListener('DOMContentLoaded', function () {
+            const emailField = document.getElementById('email');
+            const usernameField = document.getElementById('username');
+>>>>>>> fe6c7f2e2bba8cd7f2ce5443a5ff2bdc1911754f
             const passwordField = document.getElementById('password');
-            const toggleIcon = this.querySelector('i');
+            const emailMessage = document.getElementById('email-message');
+            const usernameMessage = document.getElementById('username-message');
+            const passwordMessage = document.getElementById('password-message');
+            const submitButton = document.getElementById('submit');
+            const togglePassword = document.getElementById('toggle-password');
 
+<<<<<<< HEAD
             if (passwordField.type === 'password') {
                 passwordField.type = 'text';
                 toggleIcon.classList.replace('fa-eye', 'fa-eye-slash');
             } else {
                 passwordField.type = 'password';
                 toggleIcon.classList.replace('fa-eye-slash', 'fa-eye');
+=======
+            let emailAvailable = false;
+            let usernameAvailable = false;
+
+            function validateEmailFormat(email) {
+                return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(email);
+>>>>>>> fe6c7f2e2bba8cd7f2ce5443a5ff2bdc1911754f
             }
+
+            function validateUsernameFormat(username) {
+                return /^[a-zA-Z0-9_]{3,30}$/.test(username);
+            }
+
+            function validatePassword() {
+                if (passwordField.value.length < 8) {
+                    passwordMessage.textContent = 'Password must be at least 8 characters long!';
+                    return false;
+                }
+                passwordMessage.textContent = '';
+                return true;
+            }
+
+            function checkAvailability(type, value, messageElement, callback) {
+                if (!value) return;
+
+                fetch('check_availability.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `${type}=${encodeURIComponent(value)}`
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            messageElement.textContent = `This ${type} is already taken!`;
+                            callback(false);
+                        } else {
+                            messageElement.textContent = '';
+                            callback(true);
+                        }
+                        updateSubmitButtonState();
+                    });
+            }
+
+            function updateSubmitButtonState() {
+                submitButton.disabled = !(emailAvailable && usernameAvailable && validatePassword());
+            }
+
+            emailField.addEventListener('input', function () {
+                if (!validateEmailFormat(this.value)) {
+                    emailMessage.textContent = 'Invalid email format!';
+                    emailAvailable = false;
+                    updateSubmitButtonState();
+                    return;
+                }
+                checkAvailability('email', this.value, emailMessage, status => {
+                    emailAvailable = status;
+                });
+            });
+
+            usernameField.addEventListener('input', function () {
+                if (!validateUsernameFormat(this.value)) {
+                    usernameMessage.textContent = 'Username must be 3-30 characters long and contain only letters, numbers, and underscores!';
+                    usernameAvailable = false;
+                    updateSubmitButtonState();
+                    return;
+                }
+                checkAvailability('username', this.value, usernameMessage, status => {
+                    usernameAvailable = status;
+                });
+            });
+
+            passwordField.addEventListener('input', function () {
+                validatePassword();
+                updateSubmitButtonState();
+            });
+
+            togglePassword.addEventListener('click', function () {
+                passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
         });
     </script>
 </body>
